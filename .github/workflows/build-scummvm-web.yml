@@ -41,16 +41,68 @@ jobs:
         run: |
           chmod +x ./dists/emscripten/build.sh
           # 'got' (God of Thunder) hata diya - ye is engine me abhi nahi hai.
-          # 'build' meta-task ki jagah steps khud likhe hain, aur aakhri
-          # 'icons' step chhod diya (woh sirf cover-art thumbnails ke liye hai
-          # aur wahi fail ho raha tha). Baaki sab - engine + games - ban jaayega.
-          ./dists/emscripten/build.sh setup libs configure make games dist add-games \
+          # Sirf 'dist' tak chala rahe hain. Uske baad ke do steps - 'add-games'
+          # (Puppeteer robot-browser) aur 'icons' (cover art) - CI pe tootte hain
+          # aur game khelne ke liye zaroori bhi nahi. Asli ScummVM demo bhi inhe
+          # CI pe skip karta hai. make/games/dist pichli baar chal chuke the.
+          ./dists/emscripten/build.sh setup libs configure make games dist \
             --verbose \
             --disable-all-engines \
             --enable-plugins \
             --default-dynamic \
             --enable-engine=sky,queen,lure,drascula,dreamweb,griffon,sword25,cge,cge2,parallaction,sludge,testbed \
             --bundle-games=sky/BASS-Floppy-1.3.zip,drascula/drascula-1.0.zip,queen/FOTAQ_Floppy.zip,lure
+
+      # Launcher me 4 games apne aap dikhein iske liye ek scummvm.ini likho.
+      # (Ye normally 'add-games' step banata, jo CI pe toot raha tha - to hum
+      # khud bana rahe hain. Paths bilkul waise hain jaise bundle-games banata hai.)
+      - name: Write scummvm.ini (games launcher me dikhane ke liye)
+        working-directory: scummvm/build-emscripten
+        run: |
+          cat > scummvm.ini <<'EOF'
+          [scummvm]
+          always_run_fallback_detection_extern=false
+
+          [sky]
+          platform=pc
+          gameid=sky
+          description=Beneath a Steel Sky (Floppy/DOS)
+          extra=Floppy
+          path=/data/games/sky-BASS-Floppy-1.3
+          engineid=sky
+          guioptions=sndNoSpeech lang_English (GB)
+
+          [drascula]
+          platform=pc
+          gameid=drascula
+          description=Drascula: The Vampire Strikes Back (DOS/English)
+          language=en
+          path=/data/games/drascula-1.0
+          engineid=drascula
+          guioptions=sndNoMIDI sndLinkSpeechToSfx gameOption1 gameOption2 lang_English
+
+          [queen]
+          platform=pc
+          gameid=queen
+          description=Flight of the Amazon Queen (Floppy/DOS/English)
+          language=en
+          extra=Floppy
+          path=/data/games/queen-FOTAQ_Floppy/FOTAQ_Floppy
+          engineid=queen
+          guioptions=sndNoSpeech lang_English
+
+          [lure]
+          platform=pc
+          gameid=lure
+          description=Lure of the Temptress (VGA/DOS/English)
+          language=en
+          extra=VGA
+          path=/data/games/lure-1.1/lure
+          engineid=lure
+          guioptions=sndNoSpeech gameOption1 gameOption2 lang_English
+          EOF
+          echo "scummvm.ini likh diya:"
+          cat scummvm.ini
 
       # Ban gaya sab kuch is folder me. Ab isko download karne layak banao.
       - name: Upload the finished website
