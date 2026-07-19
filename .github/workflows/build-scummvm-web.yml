@@ -1,0 +1,57 @@
+name: Build ScummVM Web
+
+# Isko manually chalane ke liye "Run workflow" button milega (Actions tab me),
+# aur push karne pe bhi apne aap chalega.
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      # ScummVM ka source code (browser/emscripten version) laao
+      - name: Checkout ScummVM (emscripten)
+        uses: actions/checkout@v4
+        with:
+          repository: chkuendig/scummvm
+          ref: emscripten
+          path: scummvm
+
+      # Icons ka data chahiye hota hai game list ke liye
+      - name: Checkout ScummVM icons
+        uses: actions/checkout@v4
+        with:
+          repository: chkuendig/scummvm-icons
+          path: scummvm-icons
+
+      # Build ke liye kuch basic tools
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git python3 python3-pip curl unzip pkg-config nasm
+
+      # Yahan asli jaadu hota hai: GitHub ke computer pe engine + games ban jaate hain.
+      # --enable-engine = kaun kaun se games chalane hain (sirf freeware waale)
+      # --bundle-games  = kaun si games download karke andar daalni hain
+      - name: Build ScummVM for the web
+        working-directory: scummvm
+        run: |
+          chmod +x ./dists/emscripten/build.sh
+          ./dists/emscripten/build.sh build \
+            --verbose \
+            --disable-all-engines \
+            --enable-plugins \
+            --default-dynamic \
+            --enable-engine=sky,queen,lure,drascula,dreamweb,griffon,sword25,cge,cge2,parallaction,got,sludge,testbed \
+            --bundle-games=sky/BASS-Floppy-1.3.zip,queen/FOTAQ_Talkie-original.zip,lure/lure-1.1.zip,drascula/drascula-1.0.zip,dreamweb/dreamweb-uk-1.1.zip,griffon/griffon-1.0.zip,sword25/sword25-v1.0.zip,soltys/soltys-en-v1.0.zip,sfinx/sfinx-en-v1.1.zip,nippon/nippon-1.0.zip,got/gotfree.zip,outoforder/outoforder.zip
+
+      # Ban gaya sab kuch is folder me. Ab isko download karne layak banao.
+      - name: Upload the finished website
+        uses: actions/upload-artifact@v4
+        with:
+          name: scummvm-web-build
+          path: scummvm/build-emscripten
+          if-no-files-found: error
