@@ -40,13 +40,17 @@ jobs:
         working-directory: scummvm
         run: |
           chmod +x ./dists/emscripten/build.sh
+          # 'got' (God of Thunder) hata diya - ye is engine me abhi nahi hai.
+          # Engines to kaafi enable kar rahe hain (taaki baad me games add ho sakein),
+          # par bundle sirf 4 pakke-chalne-waale freeware games ka rakha hai
+          # taaki pehli baar build zaroor success ho.
           ./dists/emscripten/build.sh build \
             --verbose \
             --disable-all-engines \
             --enable-plugins \
             --default-dynamic \
-            --enable-engine=sky,queen,lure,drascula,dreamweb,griffon,sword25,cge,cge2,parallaction,got,sludge,testbed \
-            --bundle-games=sky/BASS-Floppy-1.3.zip,queen/FOTAQ_Talkie-original.zip,lure/lure-1.1.zip,drascula/drascula-1.0.zip,dreamweb/dreamweb-uk-1.1.zip,griffon/griffon-1.0.zip,sword25/sword25-v1.0.zip,soltys/soltys-en-v1.0.zip,sfinx/sfinx-en-v1.1.zip,nippon/nippon-1.0.zip,got/gotfree.zip,outoforder/outoforder.zip
+            --enable-engine=sky,queen,lure,drascula,dreamweb,griffon,sword25,cge,cge2,parallaction,sludge,testbed \
+            --bundle-games=sky/BASS-Floppy-1.3.zip,drascula/drascula-1.0.zip,queen/FOTAQ_Floppy.zip,lure
 
       # Ban gaya sab kuch is folder me. Ab isko download karne layak banao.
       - name: Upload the finished website
