@@ -41,10 +41,10 @@ jobs:
         run: |
           chmod +x ./dists/emscripten/build.sh
           # 'got' (God of Thunder) hata diya - ye is engine me abhi nahi hai.
-          # Engines to kaafi enable kar rahe hain (taaki baad me games add ho sakein),
-          # par bundle sirf 4 pakke-chalne-waale freeware games ka rakha hai
-          # taaki pehli baar build zaroor success ho.
-          ./dists/emscripten/build.sh build \
+          # 'build' meta-task ki jagah steps khud likhe hain, aur aakhri
+          # 'icons' step chhod diya (woh sirf cover-art thumbnails ke liye hai
+          # aur wahi fail ho raha tha). Baaki sab - engine + games - ban jaayega.
+          ./dists/emscripten/build.sh setup libs configure make games dist add-games \
             --verbose \
             --disable-all-engines \
             --enable-plugins \
